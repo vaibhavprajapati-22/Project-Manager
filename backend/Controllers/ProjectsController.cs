@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerBackend.Dtos;
-using ProjectManagerBackend.Services;
 using System.Security.Claims;
 
 namespace ProjectManagerBackend.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -13,14 +11,7 @@ public class ProjectsController : ControllerBase
 {
     private readonly IProjectService _svc;
     private readonly IAuthService _auth;
-    private readonly ISchedulerService _scheduler;
-
-    public ProjectsController(IProjectService svc, IAuthService auth, ISchedulerService scheduler)
-    {
-        _svc = svc;
-        _auth = auth;
-        _scheduler = scheduler;
-    }
+    public ProjectsController(IProjectService svc, IAuthService auth) { _svc = svc; _auth = auth; }
 
     private int UserId() => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -63,13 +54,5 @@ public class ProjectsController : ControllerBase
     {
         if (!await _svc.DeleteProject(id, UserId())) return NotFound();
         return NoContent();
-    }
-
-     [HttpPost("{projectId}/schedule")]
-    public IActionResult SmartSchedule(int projectId, [FromBody] ScheduleRequestDto req)
-    {
-        var (success, response, error) = _scheduler.GenerateSchedule(req);
-        if (!success) return BadRequest(new ScheduleErrorDto { Error = error ?? "Invalid input." });
-        return Ok(response);
     }
 }
