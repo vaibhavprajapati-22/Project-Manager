@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProjectManagerBackend;
 using ProjectManagerBackend.Models;
+using ProjectManagerBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// register DbContext once (uses connection string or fallback file)
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("Default") ?? "Data Source=projects.db"));
 
@@ -53,6 +53,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 
+builder.Services.AddScoped<ISchedulerService, SchedulerService>();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
